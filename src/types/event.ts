@@ -4,6 +4,7 @@ export type Event ={
     description:string,
     date:string,
     time:string,
+    city:string,
     location:string,
     category:string,
     price:string,
