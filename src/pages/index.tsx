@@ -1,9 +1,11 @@
-import Image from "next/image";
 import { GetStaticProps } from "next";
 import events from '@/data/data.json';
 import { Event } from "@/types/event";
-import Link from "next/link";
 import { useState, useEffect } from "react";
+import Head from "next/head";
+import Filter from "@/components/filter";
+import EventCard from "@/components/eventCard";
+import Button from "@/components/button";
 
 type Props = {
   events: Event[],
@@ -83,159 +85,78 @@ export default function Home({ events }: Props) {
   };
 
   return (
-    <div className="home-page-container p-6">
-      <div className="filters-section mb-8 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
-        <div>
-          <label htmlFor="searchInput" className="block text-sm font-medium mb-1">
-            Search Events:
-          </label>
-          <input
-            id="searchInput"
-            type="text"
-            className="border rounded px-3 py-2 w-full"
-            placeholder="Search by title, description..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+    <>
+      <Head>
+        <title>Event Listings - Find Amazing Events Near You</title>
+        <meta name="description" content="Discover and explore amazing events in your area. Filter by location, date, category, and price to find the perfect event for you." />
+        <meta name="keywords" content="events, listings, local events, entertainment, activities" />
+        <meta property="og:title" content="Event Listings - Find Amazing Events Near You" />
+        <meta property="og:description" content="Discover and explore amazing events in your area. Filter by location, date, category, and price to find the perfect event for you." />
+        <meta property="og:type" content="website" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="Event Listings - Find Amazing Events Near You" />
+        <meta name="twitter:description" content="Discover and explore amazing events in your area. Filter by location, date, category, and price to find the perfect event for you." />
+      </Head>
+      <div className="pt-8">
+        <main className="container-narrow py-12">
+          <header className="mb-10">
+            <h1 className="text-3xl font-semibold mb-2">Find Events</h1>
+            <p className="text-[var(--gray-500)]">Discover and explore amazing events in your area</p>
+          </header>
+          
+          <Filter 
+            locations={uniqueLocations}
+            dates={uniqueDates}
+            categories={uniqueCategories}
+            selectedLocation={selectedLocation}
+            selectedDate={selectedDate}
+            selectedCategory={selectedCategory}
+            searchTerm={searchTerm}
+            priceRange={priceRange}
+            onLocationChange={setSelectedLocation}
+            onDateChange={setSelectedDate}
+            onCategoryChange={setSelectedCategory}
+            onSearchChange={setSearchTerm}
+            onPriceRangeChange={setPriceRange}
+            onClearFilters={clearFilters}
           />
-        </div>
 
-        <div>
-          <label htmlFor="locationFilter" className="block text-sm font-medium mb-1">
-            Filter by Location:
-          </label>
-          <select
-            id="locationFilter"
-            className="border rounded px-3 py-2 w-full"
-            value={selectedLocation}
-            onChange={(e) => setSelectedLocation(e.target.value)}
-          >
-            <option value="">All Locations</option>
-            {uniqueLocations.map((location) => (
-              <option value={location} key={location}>{location}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="dateFilter" className="block text-sm font-medium mb-1">
-            Filter by Date:
-          </label>
-          <select
-            id="dateFilter"
-            className="border rounded px-3 py-2 w-full"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-          >
-            <option value="">All Dates</option>
-            {uniqueDates.map((date) => (
-              <option value={date} key={date}>{date}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="categoryFilter" className="block text-sm font-medium mb-1">
-            Filter by Category:
-          </label>
-          <select
-            id="categoryFilter"
-            className="border rounded px-3 py-2 w-full"
-            value={selectedCategory}
-            onChange={(e) => setSelectedCategory(e.target.value)}
-          >
-            <option value="">All Categories</option>
-            {uniqueCategories.map((category) => (
-              <option value={category} key={category}>{category}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="priceFilter" className="block text-sm font-medium mb-1">
-            Filter by Price:
-          </label>
-          <select
-            id="priceFilter"
-            className="border rounded px-3 py-2 w-full"
-            value={priceRange}
-            onChange={(e) => setPriceRange(e.target.value)}
-          >
-            <option value="">All Prices</option>
-            <option value="free">Free</option>
-            <option value="0-500">₹1 - ₹500</option>
-            <option value="500-2000">₹500 - ₹2000</option>
-            <option value="2000+">₹2000+</option>
-          </select>
-        </div>
-
-        <div className="flex items-end">
-          <button 
-            onClick={clearFilters} 
-            className="bg-gray-500 text-white px-4 py-2 rounded w-full hover:bg-gray-600"
-          >
-            Clear Filters
-          </button>
-        </div>
-      </div>
-
-      <div className="results-info mb-4">
-        <p className="text-gray-600">
-          Showing {filteredData.length} of {events.length} events
-        </p>
-      </div>
-
-      <div className="events-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredData.map((event) => (
-          <div key={event.id} className="event-card border rounded-lg p-4 shadow-md hover:shadow-lg transition-shadow">
-            <Image 
-              alt={event.title} 
-              src={event.image} 
-              width={300} 
-              height={200} 
-              className="w-full h-48 object-cover rounded mb-4"
-            />
-            <div className="event-content">
-              <span className="category-badge bg-blue-100 text-blue-800 text-xs font-semibold px-2 py-1 rounded">
-                {event.category}
-              </span>
-              <h2 className="text-xl font-bold mt-2 mb-2">{event.title}</h2>
-              <div className="event-details text-sm text-gray-600 space-y-1">
-                <p><strong>Date:</strong> {event.date}</p>
-                <p><strong>Time:</strong> {event.time}</p>
-                <p><strong>Location:</strong> {event.city}</p>
-                <p><strong>Price:</strong> <span className="text-green-600 font-semibold">{event.price}</span></p>
-                <p><strong>Capacity:</strong> {event.capacity} people</p>
-              </div>
-              <div className="tags mt-3">
-                {event.tags.slice(0, 3).map((tag) => (
-                  <span key={tag} className="tag bg-gray-200 text-gray-700 text-xs px-2 py-1 rounded mr-1">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <Link 
-                href={`events/${event.id}`} 
-                className="view-details-btn block mt-4 bg-blue-500 text-white text-center py-2 rounded hover:bg-blue-600 transition-colors"
-              >
-                View Details
-              </Link>
+          <section className="results-section mb-6">
+            <h2 className="sr-only">Event Results</h2>
+            <div className="flex justify-between items-center">
+              <p className="text-[var(--gray-500)]">
+                Showing <span className="font-semibold">{filteredData.length}</span> of <span className="font-semibold">{events.length}</span> events
+              </p>
             </div>
-          </div>
-        ))}
-      </div>
+          </section>
 
-      {filteredData.length === 0 && (
-        <div className="no-results text-center py-12">
-          <p className="text-gray-500 text-lg">No events found matching your criteria.</p>
-          <button 
-            onClick={clearFilters} 
-            className="mt-4 bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600"
-          >
-            Clear Filters
-          </button>
-        </div>
-      )}
-    </div>
+          <section className="events-section">
+            <h2 className="sr-only">Events List</h2>
+            <div className="events-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredData.map((event) => (
+                <EventCard key={event.id} event={event} />
+              ))}
+            </div>
+
+            {filteredData.length === 0 && (
+              <div className="no-results bg-white rounded-[var(--border-radius)] shadow-sm text-center py-16 px-6">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-[var(--gray-300)] mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-xl font-medium mb-2">No events found</h3>
+                <p className="text-[var(--gray-500)] mb-6">Try adjusting your filters to find what you&apos;re looking for.</p>
+                <Button 
+                  onClick={clearFilters} 
+                  variant="primary"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            )}
+          </section>
+        </main>
+      </div>
+    </>
   );
 }
 
